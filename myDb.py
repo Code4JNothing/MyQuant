@@ -33,7 +33,7 @@ def data_insert(db: object, cursor: object, sql: object) -> object:
     try:
         # 执行sql语句
         cursor.execute(sql)
-        print(sql)
+        # print(sql)
         # 提交到数据库执行
         db.commit()
         return True
