@@ -41,7 +41,7 @@ def get_stock_code_date():
 
 
 def tick_insert(code, date):
-    if date > '20180630':
+    if '20180630' < date < '20190707':
 
         stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
         stock_tick_date['code'] = code
@@ -159,9 +159,11 @@ def hist_tick_insert():
         detail = tick_insert(code=row[0], date=row[1])
         if detail is None:
             continue
+        print(row)
         for index, detail_row in detail.iterrows():
             sql = "INSERT INTO tick_data(ID, CODE, DATE, TIME, PRICE, PCHANGE, VOLUME, AMOUNT, TYPE) VALUES (" \
-                  + '\'' + str(detail_row['code']) + str(detail_row['date']).replace("-", "") + str(detail_row['time']).replace(":", "") + '\'' + ',' \
+                  + '\'' + str(detail_row['code']) + str(detail_row['date']).replace("-", "") \
+                  + str(detail_row['time']).replace(":", "") + str(detail_row['volume']) + '\'' + ',' \
                   + '\'' + str(detail_row['code']) + '\'' + ',' \
                   + '\'' + str(detail_row['date']).replace("-", "") + '\'' + ',' \
                   + '\'' + str(detail_row['time']) + '\'' + ',' \
@@ -172,7 +174,6 @@ def hist_tick_insert():
                   + '\'' + str(detail_row['type']) + '\'' \
                   + ')'
             myDb.data_insert(db, cursor, sql)
-        print(row)
     db.close()
     print("历史分时数据插入完成")
     return
