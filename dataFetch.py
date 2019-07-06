@@ -163,7 +163,7 @@ def hist_tick_insert():
             sql = "INSERT INTO tick_data(ID, CODE, DATE, TIME, PRICE, PCHANGE, VOLUME, AMOUNT, TYPE) VALUES (" \
                   + '\'' + str(detail_row['code']) + str(detail_row['date']).replace("-", "") + str(detail_row['time']).replace(":", "") + '\'' + ',' \
                   + '\'' + str(detail_row['code']) + '\'' + ',' \
-                  + '\'' + str(detail_row['date']) + '\'' + ',' \
+                  + '\'' + str(detail_row['date']).replace("-", "") + '\'' + ',' \
                   + '\'' + str(detail_row['time']) + '\'' + ',' \
                   + '\'' + str(detail_row['price']) + '\'' + ',' \
                   + '\'' + str(detail_row['change']) + '\'' + ',' \
@@ -172,6 +172,7 @@ def hist_tick_insert():
                   + '\'' + str(detail_row['type']) + '\'' \
                   + ')'
             myDb.data_insert(db, cursor, sql)
+        print(row)
     db.close()
     print("历史分时数据插入完成")
     return

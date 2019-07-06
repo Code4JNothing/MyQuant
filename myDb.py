@@ -36,7 +36,6 @@ def data_insert(db: object, cursor: object, sql: object) -> object:
         print(sql)
         # 提交到数据库执行
         db.commit()
-        print("插入成功")
         return True
     except:
         # 如果发生错误则回滚
