@@ -1,0 +1,47 @@
+"""
+数据库操作
+"""
+
+import pymysql as mysql
+import traceback
+
+
+def db_connect():
+    """
+    数据库连接
+    """
+    db = mysql.connect("localhost", "root", "mysql", "mystockdata")
+    print("mystockdata:数据连接成功")
+    return db
+
+
+def db_close():
+    """
+    断开连接
+    :return:
+    """
+
+
+def data_insert(db: object, cursor: object, sql: object) -> object:
+    """
+    数据插入
+    :param db: 数据库连接
+    :param cursor: 游标
+    :param sql: sql
+    :return: 执行结果
+    """
+    try:
+        # 执行sql语句
+        cursor.execute(sql)
+        print(sql)
+        # 提交到数据库执行
+        db.commit()
+        print("插入成功")
+        return True
+    except:
+        # 如果发生错误则回滚
+        db.rollback()
+        print("数据插入失败: ", sql)
+        traceback.print_exc()
+        return False
+
