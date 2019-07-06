@@ -5,7 +5,7 @@ from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 
 Base = declarative_base()
 
-
+# test github
 class DailyInfo(Base):
     __tablename__ = 'daily_info'
     id = Column(String(16), Sequence('user_id_seq'), primary_key=True)
