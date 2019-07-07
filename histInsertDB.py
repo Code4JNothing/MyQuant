@@ -1,4 +1,4 @@
-import dataFetch
+import tushare_data
 import myDb
 from datetime import datetime
 import pandas
@@ -12,7 +12,7 @@ def hs300_insert():
     沪深300成分股入库
     :return:
     """
-    hs300 = dataFetch.get_hs300s()
+    hs300 = tushare_data.get_hs300s()
     db = myDb.db_connect()
     cursor = db.cursor()
     for index, row in hs300.iterrows():
@@ -33,9 +33,9 @@ def hist_daily_insert():
     历史复权数据入库
     :return:
     """
-    dataFetch.hist_daily_insert('bfq')
-    dataFetch.hist_daily_insert('qfq')
-    dataFetch.hist_daily_insert('hfq')
+    tushare_data.hist_daily_insert('bfq')
+    tushare_data.hist_daily_insert('qfq')
+    tushare_data.hist_daily_insert('hfq')
 
     return
 
@@ -44,5 +44,5 @@ if __name__ == '__main__':
     # 历史日线数据
     # hist_daily_insert()
     # 历史分时数据
-    dataFetch.hist_tick_insert()
+    tushare_data.hist_tick_insert()
 
