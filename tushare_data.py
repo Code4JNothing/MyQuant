@@ -41,7 +41,7 @@ def get_stock_code_date():
 
 
 def tick_insert(code, date):
-    if '20180630' < date < '20190707':
+    if '20180630' < date < '20190707' and code <= '601186':
 
         stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
         stock_tick_date['code'] = code
