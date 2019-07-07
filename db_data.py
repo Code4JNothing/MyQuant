@@ -16,14 +16,14 @@ session: object = DBSession()
 
 def get_vol_stocks(ts_code=None, trade_date=None):
     """
-    获取股票代码、交易日期、交易量，默认近三年
-    :param ts_code:股票代码，默认为零
+    获取股票代码、交易日期、交易量，默认近两年
+   :param ts_code:股票代码，默认为零
     :param trade_date:交易起始日期
     :return: DataFrame，获取股票的代码，交易日期，成交量
     """
     # 如日期为None则默认返回近三年数据
     if trade_date is None:
-        trade_date = (datetime.datetime.today() - datetime.timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+        trade_date = (datetime.datetime.today() - datetime.timedelta(days=365*2)).strftime('%Y-%m-%d')
     if ts_code:
         query_obj = session.query(tables.DailyInfo.code, tables.DailyInfo.trade_date,
                                   tables.DailyInfo.vol).filter(tables.DailyInfo.code == ts_code,
