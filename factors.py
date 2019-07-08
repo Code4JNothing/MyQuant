@@ -1,7 +1,10 @@
 """
 因子分析函数
 """
+import datetime
+
 import db_data
+import util
 
 
 def is_quantile_qth(code, date=None, n=5, q=0.2):
@@ -18,3 +21,16 @@ def is_quantile_qth(code, date=None, n=5, q=0.2):
     quantitles_qth = hist_data['vol'].quantile(q)
 
     return code, (hist_data['vol'].tail(n).values < quantitles_qth).all()
+
+
+def back_test_factors(code, date):
+    """
+    根据分位数进行历史收益回测，给定某一日期，如果 连续五日处于某分位以内，则计算其未来半年的收益情况
+    :param code 股票代码
+    :param date 回测日期 %Y-%m-%d
+    :return:
+    """
+    daily_info = db_data.get_vol_stocks(ts_code=code)
+    dates = util.data_start_end_future(date)
+    daily_info_period = daily_info.loc[daily_info[dates[1] > 'trade_date'] > dates[0]]
+    # TODO 待完善

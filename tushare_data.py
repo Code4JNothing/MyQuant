@@ -41,13 +41,20 @@ def get_stock_code_date():
 
 
 def tick_insert(code, date):
-    if '20180630' < date < '20190707' and code <= '601186':
+    if '20180630' < date < '20190707' and code <= '601112':
 
         stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
         stock_tick_date['code'] = code
         stock_tick_date['date'] = date
         return pandas.DataFrame(stock_tick_date)
     return
+
+
+def tick_insert1(code, date):
+    stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
+    stock_tick_date['code'] = code
+    stock_tick_date['date'] = date
+    return pandas.DataFrame(stock_tick_date)
 
 
 def today_ticks_insert():
@@ -61,7 +68,7 @@ def today_ticks_insert():
     print('获取当日分笔数据并入库......')
     for index, row in hs300.iterrows():
         date = datetime.datetime.now().strftime('%Y%m%d')
-        detail = tick_insert(code=row['code'], date=date)
+        detail = tick_insert1(code=row['code'], date=date)
         if detail is None:
             continue
         for index1, detail_row in detail.iterrows():
