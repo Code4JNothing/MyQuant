@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 
+import numpy
 import tushare
 import pandas
 import myDb
@@ -26,6 +27,22 @@ def get_hs300s() -> object:
     return tushare.get_hs300s()
 
 
+def get_hs30s():
+    """
+    获取沪深30支随机股票
+    return：code :股票代码
+            name :股票名称
+            date :日期
+            weight:权重
+    :return:
+    """
+    df = pandas.DataFrame(tushare.get_hs300s())
+    shuffle = numpy.arange(0, 299, 10)
+    df = df.sort_values(by='name')
+    df = df.iloc[shuffle, :]
+    return df
+
+
 def get_stock_code_date():
     db = myDb.db_connect()
     cursor = db.cursor()
@@ -34,14 +51,14 @@ def get_stock_code_date():
         cursor.execute(sql)
         # 获取所有记录列表
         return cursor.fetchall()
-    except:
+    except Exception:
         print("Error: unable to fetch data")
     finally:
         db.close()
 
 
 def tick_insert(code, date):
-    if '20180630' < date < '20190707' and code <= '601112':
+    if '20180630' < date < '20190707' and code <= '600570':
 
         stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
         stock_tick_date['code'] = code
