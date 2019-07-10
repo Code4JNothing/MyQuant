@@ -25,7 +25,9 @@ def data_start_end_future(date):
     :return: list[...],元素格式%Y%m%d
     """
     dates = str(date).strip().split("-")
-    start_date = (datetime.datetime(int(dates[0]), int(dates[1]), int(dates[2])) - datetime.timedelta(days=365 * 2)).strftime('%Y-%m-%d')
-    future = (datetime.datetime(int(dates[0]), int(dates[1]), int(dates[2])) + datetime.timedelta(days=182)).strftime('%Y-%m-%d')
+    start_date = (datetime.datetime(int(dates[0]), int(dates[1]), int(dates[2])) - datetime.timedelta(days=365 * 2))\
+        .strftime('%Y-%m-%d')
+    future = (datetime.datetime(int(dates[0]), int(dates[1]), int(dates[2])) + datetime.timedelta(days=182))\
+        .strftime('%Y-%m-%d')
     return list([start_date, date, future])
 
