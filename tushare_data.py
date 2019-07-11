@@ -12,7 +12,7 @@ import util
 
 
 def get_tushare_pro() -> object:
-    return tushare.pro_api('24242b3c493ffa79dc9257c7f6ae5314ee3f3ae2841dfb58b9cb2623')
+    return tushare.pro_api('')
 
 
 def get_hs300s() -> object:
@@ -27,7 +27,7 @@ def get_hs300s() -> object:
     return tushare.get_hs300s()
 
 
-def get_hs30s():
+def get_hs30s() -> object:
     """
     获取沪深30支随机股票
     return：code :股票代码
