@@ -1,31 +1,7 @@
 import tushare_data
 import myDb
 from datetime import datetime
-
-
-def data_convert(date_str):
-    return str(datetime.strptime(date_str, '%Y%m%d').strftime('%Y-%m-%d'))
-
-
-def hs300_insert():
-    """
-    沪深300成分股入库
-    :return:
-    """
-    hs300 = tushare_data.get_hs300s()
-    db = myDb.db_connect()
-    cursor = db.cursor()
-    for index, row in hs300.iterrows():
-        sql = "INSERT INTO INDEX_STOCKS (CODE, NAME, INDEX_TYPE, DATE, WEIGHT) VALUES(" \
-              + '\'' + row['code'] + '\'' + ',' \
-              + '\'' + row['name'] + '\'' + ',' \
-              + '\'' + '300' + '\'' + ',' + '\'' \
-              + str(row['date'])[:10] + '\'' + ',' \
-              + '\'' + str(row["weight"]) + '\'' \
-              + ')'
-        myDb.data_insert(db, cursor, sql)
-    db.close()
-    return
+import db_data
 
 
 def hist_daily_insert():
@@ -55,13 +31,11 @@ def daily_insert():
 
 
 if __name__ == '__main__':
-    print('today...')
-    # 历史日线数据
-    # hist_daily_insert()
-    # 历史分时数据
-    # dataFetch.hist_tick_insert()
-
-    # 当日日线数据
-    daily_insert()
-    # 当日分时数据
-    tushare_data.today_ticks_insert()
+    # 历史日线
+    db_data.hs30s_daily_info_add()
+    # 历史分时
+    db_data.tick_data_add()
+    # 当日日线
+    db_data.hs30s_daily_info_add(True)
+    # 当日分时
+    db_data.tick_data_add(True)

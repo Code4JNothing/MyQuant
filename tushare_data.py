@@ -170,39 +170,6 @@ def daily_today_insert(price_type):
     print("完成插入前复权历史日线数据")
 
 
-def hist_tick_insert():
-    """
-    插入历史分笔数据
-    :return:
-    """
-    print("插入历史分笔数据......")
-    db = myDb.db_connect()
-    cursor = db.cursor()
-    code_date = get_stock_code_date()
-    for row in code_date:
-        detail = tick_insert(code=row[0], date=row[1])
-        if detail is None:
-            continue
-        print(row)
-        for index, detail_row in detail.iterrows():
-            sql = "INSERT INTO tick_data(ID, CODE, DATE, TIME, PRICE, PCHANGE, VOLUME, AMOUNT, TYPE) VALUES (" \
-                  + '\'' + str(detail_row['code']) + str(detail_row['date']).replace("-", "") \
-                  + str(detail_row['time']).replace(":", "") + str(detail_row['volume']) + '\'' + ',' \
-                  + '\'' + str(detail_row['code']) + '\'' + ',' \
-                  + '\'' + str(detail_row['date']).replace("-", "") + '\'' + ',' \
-                  + '\'' + str(detail_row['time']) + '\'' + ',' \
-                  + '\'' + str(detail_row['price']) + '\'' + ',' \
-                  + '\'' + str(detail_row['change']) + '\'' + ',' \
-                  + '\'' + str(detail_row['volume']) + '\'' + ',' \
-                  + '\'' + str(detail_row['amount']) + '\'' + ',' \
-                  + '\'' + str(detail_row['type']) + '\'' \
-                  + ')'
-            myDb.data_insert(db, cursor, sql)
-    db.close()
-    print("历史分时数据插入完成")
-    return
-
-
 def hist_daily_insert(price_type):
     """
     沪深300成份股历史日线数据入库

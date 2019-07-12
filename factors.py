@@ -32,5 +32,8 @@ def back_test_factors(code, date):
     """
     daily_info = db_data.get_vol_stocks(ts_code=code)
     dates = util.data_start_end_future(date)
-    daily_info_period = daily_info.loc[daily_info[dates[1] > 'trade_date'] > dates[0]]
+    daily_info_period = daily_info.loc[(dates[1] > daily_info['trade_date']) & (daily_info['trade_date'] > dates[0])]
+    quantity = daily_info_period['vol'].quantile(0.2)
+    if (daily_info_period['vol'].tail(5).values < quantity).all():
+        return True, daily_info.loc[daily_info['trade_date'] > dates[2]].head(1)
     # TODO 待完善

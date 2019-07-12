@@ -45,4 +45,3 @@ if __name__ == '__main__':
     # hist_daily_insert()
     # 历史分时数据
     tushare_data.hist_tick_insert()
-

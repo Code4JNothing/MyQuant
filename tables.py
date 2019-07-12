@@ -1,12 +1,18 @@
 """
 描述本地数据库表属性
+优化性能，可参考：
+https://docs.sqlalchemy.org/en/13/faq/performance.html#i-m-inserting-400-000-rows-with-the-orm-and-it-s-really-slow
 """
 from sqlalchemy import Column, String, Sequence, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 from sqlalchemy.orm import sessionmaker
+import sqlite3
 
+import myDb
 
+db = myDb.db_connect()
+cursor = db.cursor()
 Base = declarative_base()
 
 # 初始化数据库连接:
@@ -58,6 +64,14 @@ def add_daily_info(id, code, trade_date, open, close, high, low, pre_close, pcha
     session.commit()
 
 
+def hs30_daily_queryy():
+    """
+    查询沪深30股票分时数据
+    :return:
+    """
+    return session.query(DailyInfo).all()
+
+
 class IndexStocks(Base):
     """
     指数股票信息
@@ -84,4 +98,56 @@ def add_index_stocks(code, date, name, weight):
 
 
 def hs30_queryy():
+    """
+    查询沪深30股票代码信息
+    :return:
+    """
     return session.query(IndexStocks).all()
+
+
+class TickDate(Base):
+    """
+    分时成交数据
+    """
+    __tablename__ = 'tick_data'
+    code = Column(String(6))
+    date = Column(String(10))
+    time = Column(String(8))
+    price = Column(FLOAT(precision=10, scale=2))
+    pchange = Column(FLOAT(precision=10, scale=2))
+    volume = Column(INTEGER(20))
+    amount = Column(FLOAT(precision=10, scale=2))
+    type = Column(String(8))
+    id = Column(String(40), primary_key=True)
+
+
+def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
+    """
+    sqlalchemy 性能较差，考虑使用原生拼接产生sql
+    """
+    '''
+    tick_data = TickDate(code=code, date=date, time=time, price=price, pchange=pchange, volume=volume, amount=amount,
+                         type=type, id=id)
+    session.add(tick_data)
+    '''
+    '''
+    # 还是很慢
+    engine.execute(TickDate.__table__.insert(), {"code": code, "date": date, "time": time, "price": price,
+                                                 "change": pchange, "volume": volume, "amount": amount, "type": type,
+                                                 "id": id})
+    '''
+    sql = "INSERT INTO tick_data(ID, CODE, DATE, TIME, PRICE, PCHANGE, VOLUME, AMOUNT, TYPE) VALUES (" \
+          + '\'' + str(id) + '\'' + ',' \
+          + '\'' + str(code) + '\'' + ',' \
+          + '\'' + str(date) + '\'' + ',' \
+          + '\'' + str(time) + '\'' + ',' \
+          + '\'' + str(price) + '\'' + ',' \
+          + '\'' + str(pchange) + '\'' + ',' \
+          + '\'' + str(volume) + '\'' + ',' \
+          + '\'' + str(amount) + '\'' + ',' \
+          + '\'' + str(type) + '\'' \
+          + ')'
+    myDb.data_insert(db, cursor, sql)
+
+
+
