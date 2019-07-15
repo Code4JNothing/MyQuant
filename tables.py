@@ -7,7 +7,6 @@ from sqlalchemy import Column, String, Sequence, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 from sqlalchemy.orm import sessionmaker
-import sqlite3
 
 import myDb
 
@@ -136,6 +135,9 @@ def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
                                                  "change": pchange, "volume": volume, "amount": amount, "type": type,
                                                  "id": id})
     '''
+    '''
+    手工拼sql减少了sql语句的表结构的解析与sql的生成
+    '''
     sql = "INSERT INTO tick_data(ID, CODE, DATE, TIME, PRICE, PCHANGE, VOLUME, AMOUNT, TYPE) VALUES (" \
           + '\'' + str(id) + '\'' + ',' \
           + '\'' + str(code) + '\'' + ',' \
@@ -149,5 +151,49 @@ def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
           + ')'
     myDb.data_insert(db, cursor, sql)
 
+
+class MoneyFlow(Base):
+    """
+    个股资金流向
+    """
+    __tablename__ = 'moneyflow'
+    id = Column(String(14), primary_key=True)
+    code = Column(String(6))
+    date = Column(String(8))
+    sell_sm_vol = Column(INTEGER(12))
+    sell_sm_amt = Column(FLOAT(precision=14, scale=2))
+    buy_sm_vol = Column(INTEGER(12))
+    buy_sm_amt = Column(FLOAT(precision=14, scale=2))
+    total_sell_vol = Column(INTEGER(12))
+    total_sell_amt = Column(FLOAT(precision=14, scale=2))
+    total_buy_vol = Column(INTEGER(12))
+    total_buy_amt = Column(FLOAT(precision=14, scale=2))
+    net_inflows_amt = Column(FLOAT(precision=14, scale=2))
+
+
+def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_amt,
+                   total_sell_vol, total_sell_amt, total_buy_vol, total_buy_amt, net_inflows_amt):
+    """
+    插入资金流量信息
+    :param id:
+    :param code: 股票代码
+    :param date: 交易日期
+    :param sell_sm_vol: 小单卖出手数
+    :param sell_sm_amt: 小单卖出金额
+    :param buy_sm_vol: 小单买入手数
+    :param buy_sm_amt: 小单买入金额
+    :param total_sell_vol: 总卖出手数
+    :param total_sell_amt: 总卖出金额
+    :param total_buy_vol: 总买入手数
+    :param total_buy_amt: 总买入金额
+    :param net_inflows_amt: 净流入金额
+    :return:
+    """
+    moneyflow = MoneyFlow(id=id, code=code, date=date, sell_sm_vol= sell_sm_vol, sell_sm_amt=sell_sm_amt,
+                          buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
+                          total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol, total_buy_amt=total_buy_amt,
+                          net_inflows_amt=net_inflows_amt)
+    session.add(moneyflow)
+    session.commit()
 
 

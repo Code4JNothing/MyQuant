@@ -1,8 +1,7 @@
 """
 因子分析函数
 """
-import datetime
-
+import math
 import db_data
 import util
 
@@ -19,7 +18,6 @@ def is_quantile_qth(code, date=None, n=5, q=0.2):
     """
     hist_data = db_data.get_vol_stocks(ts_code=code, trade_date=date)
     quantitles_qth = hist_data['vol'].quantile(q)
-
     return code, (hist_data['vol'].tail(n).values < quantitles_qth).all()
 
 
@@ -37,3 +35,11 @@ def back_test_factors(code, date):
     if (daily_info_period['vol'].tail(5).values < quantity).all():
         return True, daily_info.loc[daily_info['trade_date'] > dates[2]].head(1)
     # TODO 待完善
+
+
+def trade_scale(price, amount):
+    """
+    判断交易是否为小单
+    :return: True/False
+    """
+    return math.log10(price) >= amount / float(60000)

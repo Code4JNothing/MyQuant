@@ -97,7 +97,11 @@ def tick_data_add(today=False):
     历史分时数据插入
     :return:
     """
-    hs30s_daily_info = tables.hs30_daily_queryy()
+    if today:
+        hs30s_daily_info = tables.hs30_queryy()
+        print(hs30s_daily_info)
+    else:
+        hs30s_daily_info = tables.hs30_daily_queryy()
     for row in hs30s_daily_info:
         if today:
             date = datetime.datetime.now().strftime('%Y%m%d')
@@ -105,14 +109,15 @@ def tick_data_add(today=False):
             date = row.trade_date[:4] + '-' + row.trade_date[4:6] + '-' + row.trade_date[6:8]
         print("插入分时数据：st_code =", row.code, ' date =', date)
         try:
-            if date <= '2017-12-32':
+            if date <= '2018-06-32':
                 continue
             df = tushare.get_tick_data(code=row.code, date=date, src='tt')
             if df is None:
                 continue
             for index, tick in df.iterrows():
-                id = row.code + row.trade_date + tick['time'] + str(random.randint(1, 10000)).zfill(5)
-                tables.add_tick_date(code=row.code, date=row.trade_date, time=tick['time'], price=tick['price'],
+                date = date.replace('-', '')
+                id = row.code + date + tick['time'] + str(random.randint(1, 1000000)).zfill(5)
+                tables.add_tick_date(code=row.code, date=date, time=tick['time'], price=tick['price'],
                                      pchange=tick['change'], volume=tick['amount'], amount=tick['amount'],
                                      type=tick['type'], id=id)
             print("插入分时数据：", "st_code =", row.code, ' date =', date, "插入完成")

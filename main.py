@@ -22,20 +22,20 @@ def daily_insert():
     :return:
     """
     # 当日前复权数据
-    tushare_data.daily_today_insert('qfq')
+    # tushare_data.daily_today_insert('qfq')
     # 当日后复权数据
-    tushare_data.daily_today_insert('hfq')
+    # tushare_data.daily_today_insert('hfq')
     # 当日不复权数据
-    tushare_data.daily_today_insert('bfq')
+    # tushare_data.daily_today_insert('bfq')
     return
 
 
 if __name__ == '__main__':
     # 历史日线
-    db_data.hs30s_daily_info_add()
+    # db_data.hs30s_daily_info_add()
     # 历史分时
-    db_data.tick_data_add()
+    # db_data.tick_data_add()
     # 当日日线
-    db_data.hs30s_daily_info_add(True)
+    db_data.hs30s_daily_info_add(today=True)
     # 当日分时
-    db_data.tick_data_add(True)
+    db_data.tick_data_add(today=True)
