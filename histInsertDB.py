@@ -3,6 +3,7 @@ import myDb
 from datetime import datetime
 import pandas
 
+
 def data_convert(date_str):
     return str(datetime.strptime(date_str, '%Y%m%d').strftime('%Y-%m-%d'))
 

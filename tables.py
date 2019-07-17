@@ -3,6 +3,8 @@
 优化性能，可参考：
 https://docs.sqlalchemy.org/en/13/faq/performance.html#i-m-inserting-400-000-rows-with-the-orm-and-it-s-really-slow
 """
+import datetime
+
 from sqlalchemy import Column, String, Sequence, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import FLOAT, INTEGER
@@ -152,6 +154,18 @@ def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
     myDb.data_insert(db, cursor, sql)
 
 
+def tick_data_query(code, date=None):
+    """
+    查询分时数据
+    :return:
+    """
+    if date is None:
+        date = datetime.datetime.now().strftime('%Y%m%d')
+        import pandas
+        pandas.read_sql()
+    return session.query(TickDate).filter(TickDate.code == code, TickDate.date == date)
+
+
 class MoneyFlow(Base):
     """
     个股资金流向
@@ -189,7 +203,7 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
     :param net_inflows_amt: 净流入金额
     :return:
     """
-    moneyflow = MoneyFlow(id=id, code=code, date=date, sell_sm_vol= sell_sm_vol, sell_sm_amt=sell_sm_amt,
+    moneyflow = MoneyFlow(id=id, code=code, date=date, sell_sm_vol=sell_sm_vol, sell_sm_amt=sell_sm_amt,
                           buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
                           total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol, total_buy_amt=total_buy_amt,
                           net_inflows_amt=net_inflows_amt)

@@ -7,11 +7,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 import datetime
-
 import myDb
 import tables
 import tushare_data
-
+import pandas
 # 初始化数据库连接:
 import util
 
@@ -143,3 +142,17 @@ def hs300_insert():
               + ')'
         myDb.data_insert(db, cursor, sql)
     db.close()
+
+
+def add_money_flow():
+    """
+    生成小单统计数据
+    :return:
+    """
+    hs30s_daily_info = tables.hs30_daily_queryy()
+    for row in hs30s_daily_info:
+        tick_data = tables.tick_data_query(row.code, row.trade_date)
+        tick_data_df = pandas.DataFrame(tick_data)
+        print(tick_data_df.keys())
+
+
