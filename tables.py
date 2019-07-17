@@ -175,20 +175,28 @@ class MoneyFlow(Base):
     code = Column(String(6))
     date = Column(String(8))
     sell_sm_vol = Column(INTEGER(12))
-    sell_sm_amt = Column(FLOAT(precision=14, scale=2))
+    sell_sm_amt = Column(INTEGER(12))
     buy_sm_vol = Column(INTEGER(12))
-    buy_sm_amt = Column(FLOAT(precision=14, scale=2))
+    buy_sm_amt = Column(INTEGER(12))
     total_sell_vol = Column(INTEGER(12))
-    total_sell_amt = Column(FLOAT(precision=14, scale=2))
+    total_sell_amt =Column(INTEGER(12))
     total_buy_vol = Column(INTEGER(12))
-    total_buy_amt = Column(FLOAT(precision=14, scale=2))
-    net_inflows_amt = Column(FLOAT(precision=14, scale=2))
+    total_buy_amt = Column(INTEGER(12))
+    total_vol = Column(INTEGER(12))
+    total_amt = Column(INTEGER(12))
+    total_sm_vol = Column(INTEGER(12))
+    total_sm_amt = Column(INTEGER(12))
 
 
 def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_amt,
-                   total_sell_vol, total_sell_amt, total_buy_vol, total_buy_amt, net_inflows_amt):
+                   total_sell_vol, total_sell_amt, total_buy_vol, total_buy_amt, total_amt,
+                   total_vol, total_sm_amt, total_sm_vol):
     """
     插入资金流量信息
+    :param total_sm_vol:
+    :param total_sm_amt:
+    :param total_vol:
+    :param total_amt:
     :param id:
     :param code: 股票代码
     :param date: 交易日期
@@ -203,11 +211,10 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
     :param net_inflows_amt: 净流入金额
     :return:
     """
-    moneyflow = MoneyFlow(id=id, code=code, date=date, sell_sm_vol=sell_sm_vol, sell_sm_amt=sell_sm_amt,
-                          buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
-                          total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol, total_buy_amt=total_buy_amt,
-                          net_inflows_amt=net_inflows_amt)
+    moneyflow = MoneyFlow(id=id, code=code, date=date, sell_sm_vol=int(sell_sm_vol), sell_sm_amt=int(sell_sm_amt),
+                          buy_sm_vol=int(buy_sm_vol), buy_sm_amt=int(buy_sm_amt), total_sell_vol=int(total_sell_vol),
+                          total_sell_amt=int(total_sell_amt), total_buy_vol=int(total_buy_vol), total_buy_amt=int(total_buy_amt),
+                          total_amt=int(total_amt), total_vol=int(total_vol), total_sm_amt=int(total_sm_amt),
+                          total_sm_vol=int(total_sm_vol))
     session.add(moneyflow)
     session.commit()
-
-

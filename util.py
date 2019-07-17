@@ -3,6 +3,8 @@
 """
 import datetime
 
+import math
+
 
 def stock_code_change(code):
     """
@@ -34,3 +36,11 @@ def data_start_end_future(date):
 
 def data_convert(date_str):
     return str(datetime.strptime(date_str, '%Y%m%d').strftime('%Y-%m-%d'))
+
+
+def trade_scale(price):
+    """
+    返回小单金额
+    :return: True/False
+    """
+    return math.log10(price) * float(60000)

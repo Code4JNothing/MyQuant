@@ -10,7 +10,6 @@ import datetime
 import myDb
 import tables
 import tushare_data
-import pandas
 # 初始化数据库连接:
 import util
 
@@ -146,13 +145,51 @@ def hs300_insert():
 
 def add_money_flow():
     """
-    生成小单统计数据
+    沪深300生成小单统计数据
+    tips:成交明细列表中的买盘/卖盘：“买盘”表示以比市价高的价格进行委托买入，并已经“主动成交”，代表外盘；
+        “卖盘”表示以比市价低的价格进行委托卖出，并已经“主动成交”，代表内盘
     :return:
     """
-    hs30s_daily_info = tables.hs30_daily_queryy()
-    for row in hs30s_daily_info:
-        tick_data = tables.tick_data_query(row.code, row.trade_date)
-        tick_data_df = pandas.DataFrame(tick_data)
-        print(tick_data_df.keys())
+    hs300_index = tushare.get_hs300s()
+    ts_codes = hs300_index['code'].apply(util.stock_code_change)
+    for ts_code in ts_codes:
+        daily_info = tushare.pro_bar(ts_code)
+        for index, row in daily_info.iterrows():
+            date = row['trade_date']
+            date = date[:4] + '-' + date[4:6] + '-' + date[6:]
+            code = row['ts_code'][:6]
+            if date > '2018-06-30':
+                df = tushare.get_tick_data(code, date=date, src='tt')
+                small_trade_amount = util.trade_scale(row['close'])
 
+                total_amt = df['amount'].sum()
+                total_vol = df['volume'].sum()
 
+                sell_trade = df.loc[(df['type'] == '卖盘')]
+                total_sell_vol = sell_trade['volume'].sum()
+                total_sell_amt = sell_trade['amount'].sum()
+
+                buy_trade = df.loc[(df['type'] == '买盘')]
+                total_buy_vol = buy_trade['volume'].sum()
+                total_buy_amt = buy_trade['amount'].sum()
+
+                sell_sm_trade = df.loc[(df['type'] == '卖盘') & (df['amount'] < small_trade_amount)]
+                sell_sm_vol = sell_sm_trade['volume'].sum()
+                sell_sm_amt = sell_sm_trade['amount'].sum()
+
+                buy_sm_trade = df.loc[(df['type'] == '买盘') & (df['amount'] < small_trade_amount)]
+                buy_sm_vol = buy_sm_trade['volume'].sum()
+                buy_sm_amt = buy_sm_trade['amount'].sum()
+                total_sm_trade = df.loc[df['amount'] < small_trade_amount]
+                total_sm_amt = total_sm_trade['amount'].sum()
+                total_sm_vol = total_sm_trade['volume'].sum()
+
+                id = code + row['trade_date']
+                tables.add_money_flow(id=id, code=code, date=row['trade_date'], sell_sm_vol=sell_sm_vol,
+                                      sell_sm_amt=sell_sm_amt,
+                                      buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
+                                      total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol,
+                                      total_buy_amt=total_buy_amt, total_amt=total_amt, total_vol=total_vol,
+                                      total_sm_amt=total_sm_amt, total_sm_vol=total_sm_vol)
+
+                # TODO:验证正确性

@@ -37,9 +37,4 @@ def back_test_factors(code, date):
     # TODO 待完善
 
 
-def trade_scale(price):
-    """
-    返回小单金额
-    :return: True/False
-    """
-    return math.log10(price) * float(60000)
+
