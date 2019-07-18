@@ -220,6 +220,16 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
     session.commit()
 
 
+def get_moneyflow_info(date):
+    """
+    查询所有个股单日资金流向信息
+    :param date:
+    :return:
+    """
+    # TODO:查询所有个股单日资金流向信息
+    pass
+
+
 class MoneyFlowStatistic(Base):
     """
     个股资金流向统计信息（沪深300）

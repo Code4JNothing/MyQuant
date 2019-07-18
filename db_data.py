@@ -193,3 +193,14 @@ def add_money_flow():
                                       total_sm_amt=total_sm_amt, total_sm_vol=total_sm_vol)
 
                 # TODO:验证正确性
+
+
+def calc_money_flow_statistic(trade_date):
+    """
+    计算资金流向统计信息并入库
+    :param trade_date:
+    :return:
+    """
+    # TODO
+    pass
+
