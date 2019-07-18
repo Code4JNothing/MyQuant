@@ -218,3 +218,35 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
                           total_sm_vol=int(total_sm_vol))
     session.add(moneyflow)
     session.commit()
+
+
+class MoneyFlowStatistic(Base):
+    """
+    个股资金流向统计信息（沪深300）
+    """
+    __tablename__ = 'moneyflowstatistic'
+    trade_date = Column(String(8), primary_key=True)
+    small_vol = Column(INTEGER(16))
+    small_amt = Column(INTEGER(16))
+    total_vol = Column(INTEGER(16))
+    total_amt = Column(INTEGER(16))
+    small_total_rate = Column(FLOAT(precision=4, scale=4))
+
+
+def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_amt, samll_total_rate):
+    """
+    插入沪深300统计信息
+    :param trade_date:yyyyMMdd
+    :param small_vol:
+    :param small_amt:
+    :param total_vol:
+    :param total_amt:
+    :param samll_total_rate:0.4f
+    :return:
+    """
+    moneyflowstatistic = MoneyFlowStatistic(trade_date=trade_date, small_amt=small_amt, small_vol=small_vol,
+                                            total_vol=total_vol, total_amt=total_amt, samll_total_rate=samll_total_rate)
+    session.add(moneyflowstatistic)
+    session.commit()
+
+
