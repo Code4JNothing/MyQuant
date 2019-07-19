@@ -35,7 +35,11 @@ if __name__ == '__main__':
     # db_data.hs30s_daily_info_add()
     # 历史分时
     # db_data.tick_data_add()
+    # 历史现金流量信息
+    db_data.add_money_flow()
     # 当日日线
     db_data.hs30s_daily_info_add(today=True)
     # 当日分时
     db_data.tick_data_add(today=True)
+    # 当日个股现金流信息
+    db_data.add_money_flow_today()
