@@ -252,13 +252,21 @@ def add_money_flow_today():
             print(err)
 
 
-def calc_money_flow_statistic(trade_date):
+def add_money_flow_statistic(today=None):
     """
     计算资金流向统计信息并入库
-    :param trade_date:
+    :param today:
     :return:
     """
+    if today:
+        date = datetime.datetime.now().strftime('%Y%m%d')
+        df = tables.get_moneyflow_info(date)
+        small_total_rate = df['total_sm_amt'] / df['total_amt'] * 100
+        tables.add_moneyflowstatistic(trade_date=date, small_amt=df['total_sm_amt'], small_vol=df['total_sm_vol'],
+                                      total_amt=df['total_amt'], total_vol=df['total_vol'],
+                                      samll_total_rate=small_total_rate)
 
-    pass
+
+
 
 
