@@ -9,7 +9,7 @@ from sqlalchemy import Column, String, Sequence, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 from sqlalchemy.orm import sessionmaker
-
+import pandas
 import myDb
 
 db = myDb.db_connect()
@@ -61,8 +61,12 @@ def add_daily_info(id, code, trade_date, open, close, high, low, pre_close, pcha
     """
     daily_info = DailyInfo(id=id, code=code, trade_date=trade_date, open=open, close=close, high=high, low=low,
                            pre_close=pre_close, pchange=pchange, pct_change=pct_change, vol=vol, amount=amount)
-    session.add(daily_info)
-    session.commit()
+    try:
+        session.add(daily_info)
+        session.rollback()
+        session.commit()
+    except Exception as err:
+        print("插入失败：", err)
 
 
 def hs30_daily_queryy():
@@ -94,8 +98,12 @@ def add_index_stocks(code, date, name, weight):
     :return:
     """
     index_stocks = IndexStocks(code=code, date=date, name=name, weight=weight)
-    session.add(index_stocks)
-    session.commit()
+    try:
+        session.add(index_stocks)
+        session.commit()
+    except Exception as err:
+        session.rollback()
+        print("插入失败：", err)
 
 
 def hs30_queryy():
@@ -151,7 +159,10 @@ def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
           + '\'' + str(amount) + '\'' + ',' \
           + '\'' + str(type) + '\'' \
           + ')'
-    myDb.data_insert(db, cursor, sql)
+    try:
+        myDb.data_insert(db, cursor, sql)
+    except Exception as err:
+        print("插入失败：", err)
 
 
 def tick_data_query(code, date=None):
@@ -216,8 +227,14 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
                           total_sell_amt=int(total_sell_amt), total_buy_vol=int(total_buy_vol), total_buy_amt=int(total_buy_amt),
                           total_amt=int(total_amt), total_vol=int(total_vol), total_sm_amt=int(total_sm_amt),
                           total_sm_vol=int(total_sm_vol))
-    session.add(moneyflow)
-    session.commit()
+    try:
+        print('-', moneyflow.id)
+        session.add(moneyflow)
+        session.commit()
+        print(code, '-', date, ":插入成功")
+    except Exception as err:
+        session.rollback()
+        print("插入失败：", err)
 
 
 def get_moneyflow_info(date):
@@ -226,8 +243,7 @@ def get_moneyflow_info(date):
     :param date:
     :return:
     """
-    # TODO:查询所有个股单日资金流向信息
-    pass
+    return pandas.read_sql(session.query(MoneyFlow).filter(MoneyFlow.date == date).statement, session.bind)
 
 
 class MoneyFlowStatistic(Base):
@@ -256,7 +272,11 @@ def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_am
     """
     moneyflowstatistic = MoneyFlowStatistic(trade_date=trade_date, small_amt=small_amt, small_vol=small_vol,
                                             total_vol=total_vol, total_amt=total_amt, samll_total_rate=samll_total_rate)
-    session.add(moneyflowstatistic)
-    session.commit()
+    try:
+        session.add(moneyflowstatistic)
+        session.commit()
+    except Exception as err:
+        session.rollback()
+        print("插入失败：", err)
 
 

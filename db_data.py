@@ -154,6 +154,8 @@ def add_money_flow():
     ts_codes = hs300_index['code'].apply(util.stock_code_change)
     for ts_code in ts_codes:
         daily_info = tushare.pro_bar(ts_code)
+        if daily_info is None:
+            continue
         for index, row in daily_info.iterrows():
             date = row['trade_date']
             date = date[:4] + '-' + date[4:6] + '-' + date[6:]
@@ -203,14 +205,17 @@ def add_money_flow_today():
     """
     hs300_index = tushare.get_hs300s()
     ts_codes = hs300_index['code'].apply(util.stock_code_change)
-    for ts_code in ts_codes:
+    for ts_code in set(ts_codes):
         try:
             date = datetime.datetime.now().strftime('%Y%m%d')
-            daily_info = tushare.pro_bar(ts_code)
-            today_daily_info = daily_info.loc[daily_info['trade_date'] == date]
-            close = today_daily_info['close']
+            daily_info = tushare_data.get_tushare_pro().daily(ts_code=ts_code, trade_date=date)
+            close = daily_info['close']
+            print(close)
 
             df = tushare.get_tick_data(str(ts_code[:6]), date=date, src='tt')
+            if df is None:
+                continue
+
             total_amt = df['amount'].sum()
             total_vol = df['volume'].sum()
 
@@ -253,8 +258,7 @@ def calc_money_flow_statistic(trade_date):
     :param trade_date:
     :return:
     """
-    # TODO
+
     pass
 
 
-add_money_flow_today()
