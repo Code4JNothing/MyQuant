@@ -210,7 +210,6 @@ def add_money_flow_today():
             date = datetime.datetime.now().strftime('%Y%m%d')
             daily_info = tushare_data.get_tushare_pro().daily(ts_code=ts_code, trade_date=date)
             close = daily_info['close']
-            print(close)
 
             df = tushare.get_tick_data(str(ts_code[:6]), date=date, src='tt')
             if df is None:
@@ -261,9 +260,13 @@ def add_money_flow_statistic(today=None):
     if today:
         date = datetime.datetime.now().strftime('%Y%m%d')
         df = tables.get_moneyflow_info(date)
-        small_total_rate = df['total_sm_amt'] / df['total_amt'] * 100
-        tables.add_moneyflowstatistic(trade_date=date, small_amt=df['total_sm_amt'], small_vol=df['total_sm_vol'],
-                                      total_amt=df['total_amt'], total_vol=df['total_vol'],
+        small_total_rate = df['total_sm_amt'].sum() / df['total_amt'].sum() * 100
+        total_sm_amt = df['total_sm_amt'].sum()
+        total_sm_vol = df['total_sm_vol'].sum()
+        total_amt = df['total_amt'].sum()
+        total_vol = df['total_vol'].sum()
+        tables.add_moneyflowstatistic(trade_date=date, small_amt=total_sm_amt, small_vol=total_sm_vol,
+                                      total_amt=total_amt, total_vol=total_vol,
                                       samll_total_rate=small_total_rate)
 
 

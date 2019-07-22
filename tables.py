@@ -185,18 +185,18 @@ class MoneyFlow(Base):
     id = Column(String(14), primary_key=True)
     code = Column(String(6))
     date = Column(String(8))
-    sell_sm_vol = Column(INTEGER(12))
-    sell_sm_amt = Column(INTEGER(12))
-    buy_sm_vol = Column(INTEGER(12))
-    buy_sm_amt = Column(INTEGER(12))
-    total_sell_vol = Column(INTEGER(12))
-    total_sell_amt =Column(INTEGER(12))
-    total_buy_vol = Column(INTEGER(12))
-    total_buy_amt = Column(INTEGER(12))
-    total_vol = Column(INTEGER(12))
-    total_amt = Column(INTEGER(12))
-    total_sm_vol = Column(INTEGER(12))
-    total_sm_amt = Column(INTEGER(12))
+    sell_sm_vol = Column(INTEGER(16))
+    sell_sm_amt = Column(INTEGER(16))
+    buy_sm_vol = Column(INTEGER(16))
+    buy_sm_amt = Column(INTEGER(16))
+    total_sell_vol = Column(INTEGER(16))
+    total_sell_amt =Column(INTEGER(16))
+    total_buy_vol = Column(INTEGER(16))
+    total_buy_amt = Column(INTEGER(16))
+    total_vol = Column(INTEGER(16))
+    total_amt = Column(INTEGER(16))
+    total_sm_vol = Column(INTEGER(16))
+    total_sm_amt = Column(INTEGER(16))
 
 
 def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_amt,
@@ -228,7 +228,6 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
                           total_amt=int(total_amt), total_vol=int(total_vol), total_sm_amt=int(total_sm_amt),
                           total_sm_vol=int(total_sm_vol))
     try:
-        print('-', moneyflow.id)
         session.add(moneyflow)
         session.commit()
         print(code, '-', date, ":插入成功")
