@@ -69,12 +69,12 @@ def add_daily_info(id, code, trade_date, open, close, high, low, pre_close, pcha
         print("插入失败：", err)
 
 
-def hs30_daily_queryy():
+def hs300_daily_queryy(date):
     """
     查询沪深30股票分时数据
     :return:
     """
-    return session.query(DailyInfo).all()
+    return pandas.read_sql(session.query(DailyInfo).filter(DailyInfo.trade_date == date).statement, session.bind)
 
 
 class IndexStocks(Base):
@@ -106,7 +106,7 @@ def add_index_stocks(code, date, name, weight):
         print("插入失败：", err)
 
 
-def hs30_queryy():
+def hs300_queryy():
     """
     查询沪深30股票代码信息
     :return:
@@ -279,3 +279,36 @@ def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_am
         print("插入失败：", err)
 
 
+class MyIndex(Base):
+    """
+    我的指数
+    :param 交易日期
+    :param 指数点位
+    """
+    __tablename__ = 'myindex'
+    date = Column(String(8), primary_key=True)
+    index = Column(FLOAT(precision=10, scale=2))
+
+
+def my_index_add(date, index):
+    """
+    插入指数点位
+    :param date:
+    :param index:
+    :return:
+    """
+    myindex = MyIndex(date=date, index=index)
+    try:
+        session.add(myindex)
+        session.commit()
+    except Exception as err:
+        session.rollback()
+        print("插入失败", err)
+
+
+def my_index_querry():
+    """
+    查询指数点位
+    :return:
+    """
+    return pandas.read_sql(session.query(MoneyFlow).statement, session.bind)

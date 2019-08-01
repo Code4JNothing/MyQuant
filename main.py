@@ -22,7 +22,7 @@ def daily_insert():
     :return:
     """
     # 当日前复权数据
-    # tushare_data.daily_today_insert('qfq')
+    tushare_data.daily_today_insert('qfq')
     # 当日后复权数据
     # tushare_data.daily_today_insert('hfq')
     # 当日不复权数据
@@ -44,4 +44,6 @@ if __name__ == '__main__':
     # 历史个股现金流信息
     db_data.add_money_flow()
     # 当日个股现金流信息
-    # db_data.add_money_flow_today()
+    db_data.add_money_flow_today()
+
+    tushare_data.hist_daily_insert('qfq')

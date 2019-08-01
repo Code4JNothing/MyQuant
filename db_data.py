@@ -12,7 +12,7 @@ import tables
 import tushare_data
 # 初始化数据库连接:
 import util
-
+import params
 engine = create_engine('mysql+mysqlconnector://root:mysql@localhost:3306/mystockdata')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
@@ -268,6 +268,14 @@ def add_money_flow_statistic(today=None):
         tables.add_moneyflowstatistic(trade_date=date, small_amt=total_sm_amt, small_vol=total_sm_vol,
                                       total_amt=total_amt, total_vol=total_vol,
                                       samll_total_rate=small_total_rate)
+
+
+def my_300index_add(today=None):
+    if today is not None:
+        date = datetime.datetime.today().strftime('%Y%y%m')
+        daily_info = tables.hs300_daily_queryy(today=date)
+        index = daily_info['close'].sum() / 300 / params.MY_INDEX_BASE
+        tables.my_index_add(date=date, index=index)
 
 
 
