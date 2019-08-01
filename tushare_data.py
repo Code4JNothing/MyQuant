@@ -185,11 +185,13 @@ def hist_daily_insert(price_type):
         ts_code = util.stock_code_change(stocks['code'])
         daily = tushare.pro_bar(ts_code=ts_code, adj=price_type)
         for index, row in daily.iterrows():
+            if row['trade_date'][:8] < '20180630':
+                continue
             sql = "INSERT INTO " + table_2_insert + " (ID, CODE, TRADE_DATE, OPEN, CLOSE, HIGH, LOW, PRE_CLOSE,PCHANGE, " \
                   + "PCT_CHANGE, VOL, AMOUNT) VALUES(" \
                   + '\'' + str(row['ts_code'][:6]) + str(row['trade_date'][:10]) + '\'' + ',' \
                   + '\'' + str(row['ts_code'][:6]) + '\'' + ',' \
-                  + '\'' + data_convert(row['trade_date'][:8]) + '\'' + ',' \
+                  + '\'' + str(row['trade_date'][:8]) + '\'' + ',' \
                   + '\'' + str(row['open']) + '\'' + ',' \
                   + '\'' + str(row['close']) + '\'' + ',' \
                   + '\'' + str(row['high']) + '\'' + ',' \
