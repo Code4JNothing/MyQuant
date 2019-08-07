@@ -13,7 +13,7 @@ import tushare_data
 # 初始化数据库连接:
 import util
 import params
-engine = create_engine('mysql+mysqlconnector://root:mysql@localhost:3306/mystockdata')
+engine = create_engine(f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.MY_INDEX_BASE}')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
 session: object = DBSession()

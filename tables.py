@@ -11,13 +11,14 @@ from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 from sqlalchemy.orm import sessionmaker
 import pandas
 import myDb
-
+import params
 db = myDb.db_connect()
 cursor = db.cursor()
 Base = declarative_base()
 
 # 初始化数据库连接:
-engine = create_engine('mysql+mysqlconnector://root:mysql@localhost:3306/mystockdata')
+engine = create_engine(
+    f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.MY_INDEX_BASE}')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
 session: object = DBSession()
