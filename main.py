@@ -45,5 +45,8 @@ if __name__ == '__main__':
     db_data.add_money_flow()
     # 当日个股现金流信息
     db_data.add_money_flow_today()
+    # 历史股票现金流统计信息
+    db_data.add_money_flow_statistic()
+    # 当日股票现金流统计信息
+    db_data.add_money_flow_statistic(today=True)
 
-    tushare_data.hist_daily_insert('qfq')

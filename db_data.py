@@ -150,50 +150,58 @@ def add_money_flow():
         “卖盘”表示以比市价低的价格进行委托卖出，并已经“主动成交”，代表内盘
     :return:
     """
-    hs300_index = tushare.get_hs300s()
-    ts_codes = hs300_index['code'].apply(util.stock_code_change)
-    for ts_code in ts_codes:
-        daily_info = tushare.pro_bar(ts_code)
-        if daily_info is None:
-            continue
-        for index, row in daily_info.iterrows():
-            date = row['trade_date']
-            date = date[:4] + '-' + date[4:6] + '-' + date[6:]
-            code = row['ts_code'][:6]
-            if date > '2018-06-30':
-                df = tushare.get_tick_data(code, date=date, src='tt')
-                total_amt = df['amount'].sum()
-                total_vol = df['volume'].sum()
+    print('插入历史现金流信息开始......')
+    try:
+        hs300_index = tushare.get_hs300s()
+        ts_codes = hs300_index['code'].apply(util.stock_code_change)
+        for ts_code in ts_codes:
+            daily_info = tushare.pro_bar(ts_code, api=tushare_data.get_tushare_pro())
+            if daily_info is None:
+                continue
+            for index, row in daily_info.iterrows():
+                date = row['trade_date']
+                date = date[:4] + '-' + date[4:6] + '-' + date[6:]
+                code = row['ts_code'][:6]
+                if date > '2018-06-30':
+                    df = tushare.get_tick_data(code, date=date, src='tt')
+                    if df is None:
+                        continue
+                    total_amt = df['amount'].sum()
+                    total_vol = df['volume'].sum()
 
-                sell_trade = df.loc[(df['type'] == '卖盘')]
-                total_sell_vol = sell_trade['volume'].sum()
-                total_sell_amt = sell_trade['amount'].sum()
+                    sell_trade = df.loc[(df['type'] == '卖盘')]
+                    total_sell_vol = sell_trade['volume'].sum()
+                    total_sell_amt = sell_trade['amount'].sum()
 
-                small_trade_amount = util.trade_scale(row['close'])
+                    small_trade_amount = util.trade_scale(row['close'])
 
-                sell_sm_trade = df.loc[(df['type'] == '卖盘') & (df['amount'] < small_trade_amount)]
-                sell_sm_vol = sell_sm_trade['volume'].sum()
-                sell_sm_amt = sell_sm_trade['amount'].sum()
+                    sell_sm_trade = df.loc[(df['type'] == '卖盘') & (df['amount'] < small_trade_amount)]
+                    sell_sm_vol = sell_sm_trade['volume'].sum()
+                    sell_sm_amt = sell_sm_trade['amount'].sum()
 
-                buy_trade = df.loc[(df['type'] == '买盘')]
-                total_buy_vol = buy_trade['volume'].sum()
-                total_buy_amt = buy_trade['amount'].sum()
+                    buy_trade = df.loc[(df['type'] == '买盘')]
+                    total_buy_vol = buy_trade['volume'].sum()
+                    total_buy_amt = buy_trade['amount'].sum()
 
-                buy_sm_trade = df.loc[(df['type'] == '买盘') & (df['amount'] < small_trade_amount)]
-                buy_sm_vol = buy_sm_trade['volume'].sum()
-                buy_sm_amt = buy_sm_trade['amount'].sum()
+                    buy_sm_trade = df.loc[(df['type'] == '买盘') & (df['amount'] < small_trade_amount)]
+                    buy_sm_vol = buy_sm_trade['volume'].sum()
+                    buy_sm_amt = buy_sm_trade['amount'].sum()
 
-                total_sm_trade = df.loc[df['amount'] < small_trade_amount]
-                total_sm_amt = total_sm_trade['amount'].sum()
-                total_sm_vol = total_sm_trade['volume'].sum()
+                    total_sm_trade = df.loc[df['amount'] < small_trade_amount]
+                    total_sm_amt = total_sm_trade['amount'].sum()
+                    total_sm_vol = total_sm_trade['volume'].sum()
 
-                id = code + row['trade_date']
-                tables.add_money_flow(id=id, code=code, date=row['trade_date'], sell_sm_vol=sell_sm_vol,
-                                      sell_sm_amt=sell_sm_amt,
-                                      buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
-                                      total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol,
-                                      total_buy_amt=total_buy_amt, total_amt=total_amt, total_vol=total_vol,
-                                      total_sm_amt=total_sm_amt, total_sm_vol=total_sm_vol)
+                    id = code + row['trade_date']
+                    tables.add_money_flow(id=id, code=code, date=row['trade_date'], sell_sm_vol=sell_sm_vol,
+                                          sell_sm_amt=sell_sm_amt,
+                                          buy_sm_vol=buy_sm_vol, buy_sm_amt=buy_sm_amt, total_sell_vol=total_sell_vol,
+                                          total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol,
+                                          total_buy_amt=total_buy_amt, total_amt=total_amt, total_vol=total_vol,
+                                          total_sm_amt=total_sm_amt, total_sm_vol=total_sm_vol)
+        print('插入历史现金流信息完成......')
+    except Exception as err:
+        print('插入历史现金流信息失败......')
+        raise err
 
 
 def add_money_flow_today():
@@ -203,6 +211,7 @@ def add_money_flow_today():
         “卖盘”表示以比市价低的价格进行委托卖出，并已经“主动成交”，代表内盘
     :return:
     """
+    print('插入当日现金流信息开始......')
     hs300_index = tushare.get_hs300s()
     ts_codes = hs300_index['code'].apply(util.stock_code_change)
     for ts_code in set(ts_codes):
@@ -247,8 +256,10 @@ def add_money_flow_today():
                                   total_sell_amt=total_sell_amt, total_buy_vol=total_buy_vol,
                                   total_buy_amt=total_buy_amt, total_amt=total_amt, total_vol=total_vol,
                                   total_sm_amt=total_sm_amt, total_sm_vol=total_sm_vol)
+            print('插入当日现金流信息完成......')
         except Exception as err:
-            print(err)
+            print('插入当日现金流信息失败......')
+            raise err
 
 
 def add_money_flow_statistic(today=None):
@@ -257,7 +268,8 @@ def add_money_flow_statistic(today=None):
     :param today:
     :return:
     """
-    if today:
+    if today is not None:
+        print('插入当日现金流统计信息开始......')
         date = datetime.datetime.now().strftime('%Y%m%d')
         df = tables.get_moneyflow_info(date)
         small_total_rate = df['total_sm_amt'].sum() / df['total_amt'].sum() * 100
@@ -268,6 +280,22 @@ def add_money_flow_statistic(today=None):
         tables.add_moneyflowstatistic(trade_date=date, small_amt=total_sm_amt, small_vol=total_sm_vol,
                                       total_amt=total_amt, total_vol=total_vol,
                                       samll_total_rate=small_total_rate)
+        print('插入当日现金流统计信息完成......')
+    else:
+        print("插入历史现金流统计信息开始......")
+        money_flow_info = tables.get_moneyflow_info()
+        money_flow_info_date_sets = money_flow_info['date'].drop_duplicates()
+        for trade_date in money_flow_info_date_sets:
+            daily_money_flow_info = money_flow_info.loc[money_flow_info['date'] == trade_date]
+            small_total_rate = daily_money_flow_info['total_sm_amt'].sum() / daily_money_flow_info['total_amt'].sum() * 100
+            total_sm_amt = daily_money_flow_info['total_sm_amt'].sum()
+            total_sm_vol = daily_money_flow_info['total_sm_vol'].sum()
+            total_amt = daily_money_flow_info['total_amt'].sum()
+            total_vol = daily_money_flow_info['total_vol'].sum()
+            tables.add_moneyflowstatistic(trade_date=trade_date, small_amt=total_sm_amt, small_vol=total_sm_vol,
+                                          total_amt=total_amt, total_vol=total_vol,
+                                          small_total_rate=small_total_rate)
+        print("插入历史现金流统计信息完成......")
 
 
 def my_300index_add(today=None):
@@ -276,7 +304,6 @@ def my_300index_add(today=None):
         daily_info = tables.hs300_daily_queryy(today=date)
         index = daily_info['close'].sum() / 300 / params.MY_INDEX_BASE
         tables.my_index_add(date=date, index=index)
-
 
 
 

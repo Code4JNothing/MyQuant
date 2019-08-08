@@ -18,7 +18,7 @@ Base = declarative_base()
 
 # 初始化数据库连接:
 engine = create_engine(
-    f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.MY_INDEX_BASE}')
+    f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.DATABASE_NAME}')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
 session: object = DBSession()
@@ -237,13 +237,16 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
         print("插入失败：", err)
 
 
-def get_moneyflow_info(date):
+def get_moneyflow_info(date=None):
     """
     查询所有个股单日资金流向信息
     :param date:
     :return:
     """
-    return pandas.read_sql(session.query(MoneyFlow).filter(MoneyFlow.date == date).statement, session.bind)
+    if date is not None:
+        return pandas.read_sql(session.query(MoneyFlow).filter(MoneyFlow.date == date).statement, session.bind)
+    else:
+        return pandas.read_sql(session.query(MoneyFlow).statement, session.bind)
 
 
 class MoneyFlowStatistic(Base):
@@ -259,7 +262,7 @@ class MoneyFlowStatistic(Base):
     small_total_rate = Column(FLOAT(precision=4, scale=4))
 
 
-def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_amt, samll_total_rate):
+def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_amt, small_total_rate):
     """
     插入沪深300统计信息
     :param trade_date:yyyyMMdd
@@ -270,14 +273,15 @@ def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_am
     :param samll_total_rate:0.4f
     :return:
     """
-    moneyflowstatistic = MoneyFlowStatistic(trade_date=trade_date, small_amt=small_amt, small_vol=small_vol,
-                                            total_vol=total_vol, total_amt=total_amt, samll_total_rate=samll_total_rate)
+    moneyflowstatistic = MoneyFlowStatistic(trade_date=int(trade_date), small_amt=int(small_amt), small_vol=int(small_vol),
+                                            total_vol=int(total_vol), total_amt=int(total_amt),
+                                            small_total_rate=small_total_rate)
     try:
         session.add(moneyflowstatistic)
         session.commit()
     except Exception as err:
         session.rollback()
-        print("插入失败：", err)
+        raise err
 
 
 class MyIndex(Base):
@@ -304,7 +308,7 @@ def my_index_add(date, index):
         session.commit()
     except Exception as err:
         session.rollback()
-        print("插入失败", err)
+        raise err
 
 
 def my_index_querry():

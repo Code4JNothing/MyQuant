@@ -9,10 +9,11 @@ import util
 '''
 获取股票相关数据
 '''
+import params
 
 
 def get_tushare_pro() -> object:
-    return tushare.pro_api('')
+    return tushare.pro_api(params.TUSHARE_TOCKEN)
 
 
 def get_hs300s() -> object:
