@@ -279,9 +279,15 @@ def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_am
     try:
         session.add(moneyflowstatistic)
         session.commit()
+        print(trade_date, ":插入成功")
     except Exception as err:
         session.rollback()
         raise err
+
+
+def getMoneyFlowStatistic():
+    """查询现金流统计信息"""
+    return pandas.read_sql(session.query(MoneyFlowStatistic).statement, session.bind)
 
 
 class MyIndex(Base):

@@ -6,6 +6,7 @@ import tushare
 import pandas
 import myDb
 import util
+
 '''
 获取股票相关数据
 '''
@@ -60,7 +61,6 @@ def get_stock_code_date():
 
 def tick_insert(code, date):
     if '20180630' < date < '20190707' and code <= '600570':
-
         stock_tick_date = tushare.get_tick_data(code=code, date=date, src='tt')
         stock_tick_date['code'] = code
         stock_tick_date['date'] = date
@@ -185,11 +185,11 @@ def hist_daily_insert(price_type):
     for index, stocks in hs300.iterrows():
         ts_code = util.stock_code_change(stocks['code'])
         daily = tushare.pro_bar(ts_code=ts_code, adj=price_type)
-        for index, row in daily.iterrows():
+        for index1, row in daily.iterrows():
             if row['trade_date'][:8] < '20180630':
                 continue
-            sql = "INSERT INTO " + table_2_insert + " (ID, CODE, TRADE_DATE, OPEN, CLOSE, HIGH, LOW, PRE_CLOSE,PCHANGE, " \
-                  + "PCT_CHANGE, VOL, AMOUNT) VALUES(" \
+            sql = "INSERT INTO " + table_2_insert + "(ID, CODE, TRADE_DATE, OPEN, CLOSE, HIGH, LOW, PRE_CLOSE," \
+                  + "PCHANGE, PCT_CHANGE, VOL, AMOUNT) VALUES(" \
                   + '\'' + str(row['ts_code'][:6]) + str(row['trade_date'][:10]) + '\'' + ',' \
                   + '\'' + str(row['ts_code'][:6]) + '\'' + ',' \
                   + '\'' + str(row['trade_date'][:8]) + '\'' + ',' \
@@ -207,5 +207,16 @@ def hist_daily_insert(price_type):
     cursor.close()
     print("完成插入历史复权日线数据:", price_type)
     return
+
+
+def get_index_daily(ts_code):
+    """
+    获取指数信息
+    :param ts_code:
+    :return:
+    """
+    pro = get_tushare_pro()
+    df = pro.index_daily(ts_code=ts_code)
+    return df
 
 

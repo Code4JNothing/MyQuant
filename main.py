@@ -1,8 +1,6 @@
 import tushare_data
-import myDb
-from datetime import datetime
 import db_data
-
+import dataView
 
 def hist_daily_insert():
     """
@@ -31,22 +29,19 @@ def daily_insert():
 
 
 if __name__ == '__main__':
-    # 历史日线
-    # db_data.hs30s_daily_info_add()
-    # 历史分时
-    # db_data.tick_data_add()
-    # 历史现金流量信息
-    # db_data.add_money_flow()
-    # 当日日线
-    # db_data.hs30s_daily_info_add(today=True)
-    # 当日分时
-    # db_data.tick_data_add(today=True)
     # 历史个股现金流信息
     db_data.add_money_flow()
-    # 当日个股现金流信息
-    db_data.add_money_flow_today()
     # 历史股票现金流统计信息
     db_data.add_money_flow_statistic()
+    # 当日个股现金流信息
+    try:
+        db_data.add_money_flow_today()
+    except Exception as err:
+        print(err)
     # 当日股票现金流统计信息
-    db_data.add_money_flow_statistic(today=True)
+    try:
+        db_data.add_money_flow_statistic(today=True)
+    except Exception as err:
+        print(err)
+    dataView.money_flow_statistic_view()
 

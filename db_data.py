@@ -13,7 +13,9 @@ import tushare_data
 # 初始化数据库连接:
 import util
 import params
-engine = create_engine(f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.MY_INDEX_BASE}')
+
+engine = create_engine(
+    f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.MY_INDEX_BASE}')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
 session: object = DBSession()
@@ -272,39 +274,41 @@ def add_money_flow_statistic(today=None):
         print('插入当日现金流统计信息开始......')
         date = datetime.datetime.now().strftime('%Y%m%d')
         df = tables.get_moneyflow_info(date)
+        if df is None:
+            print('未查到当日数据')
+            return None
         small_total_rate = df['total_sm_amt'].sum() / df['total_amt'].sum() * 100
         total_sm_amt = df['total_sm_amt'].sum()
         total_sm_vol = df['total_sm_vol'].sum()
         total_amt = df['total_amt'].sum()
         total_vol = df['total_vol'].sum()
-        tables.add_moneyflowstatistic(trade_date=date, small_amt=total_sm_amt, small_vol=total_sm_vol,
-                                      total_amt=total_amt, total_vol=total_vol,
-                                      samll_total_rate=small_total_rate)
-        print('插入当日现金流统计信息完成......')
+        try:
+            tables.add_moneyflowstatistic(trade_date=date, small_amt=total_sm_amt, small_vol=total_sm_vol,
+                                          total_amt=total_amt, total_vol=total_vol,
+                                          small_total_rate=small_total_rate)
+            print('插入当日现金流统计信息完成......')
+        except Exception as err:
+            print('插入当日现金流统计信息失败', err)
     else:
         print("插入历史现金流统计信息开始......")
         money_flow_info = tables.get_moneyflow_info()
         money_flow_info_date_sets = money_flow_info['date'].drop_duplicates()
         for trade_date in money_flow_info_date_sets:
             daily_money_flow_info = money_flow_info.loc[money_flow_info['date'] == trade_date]
-            small_total_rate = daily_money_flow_info['total_sm_amt'].sum() / daily_money_flow_info['total_amt'].sum() * 100
+            small_total_rate = daily_money_flow_info['total_sm_amt'].sum() / daily_money_flow_info[
+                'total_amt'].sum() * 100
             total_sm_amt = daily_money_flow_info['total_sm_amt'].sum()
             total_sm_vol = daily_money_flow_info['total_sm_vol'].sum()
             total_amt = daily_money_flow_info['total_amt'].sum()
             total_vol = daily_money_flow_info['total_vol'].sum()
-            tables.add_moneyflowstatistic(trade_date=trade_date, small_amt=total_sm_amt, small_vol=total_sm_vol,
-                                          total_amt=total_amt, total_vol=total_vol,
-                                          small_total_rate=small_total_rate)
+            try:
+                tables.add_moneyflowstatistic(trade_date=trade_date, small_amt=total_sm_amt, small_vol=total_sm_vol,
+                                              total_amt=total_amt, total_vol=total_vol,
+                                              small_total_rate=small_total_rate)
+            except Exception as err:
+                print('插入历史现金流统计信息失败', err)
         print("插入历史现金流统计信息完成......")
 
 
-def my_300index_add(today=None):
-    if today is not None:
-        date = datetime.datetime.today().strftime('%Y%y%m')
-        daily_info = tables.hs300_daily_queryy(today=date)
-        index = daily_info['close'].sum() / 300 / params.MY_INDEX_BASE
-        tables.my_index_add(date=date, index=index)
-
-
-
-
+def get_money_flow_statistic():
+    return tables.getMoneyFlowStatistic()

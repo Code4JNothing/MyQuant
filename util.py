@@ -43,4 +43,6 @@ def trade_scale(price):
     返回小单金额
     :return: True/False
     """
-    return math.log10(price) * float(60000)
+    # return math.log10(price) * float(60000)
+    # 测试5万定义为小单
+    return float(50000)
