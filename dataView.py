@@ -1,9 +1,5 @@
 import db_data as data
-import datetime
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.cbook as cbook
 
 import tushare_data
 
