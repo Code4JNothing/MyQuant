@@ -9,15 +9,16 @@ from sqlalchemy import Column, String, Sequence, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import FLOAT, INTEGER
 from sqlalchemy.orm import sessionmaker
-
+import pandas
 import myDb
-
+import params
 db = myDb.db_connect()
 cursor = db.cursor()
 Base = declarative_base()
 
 # 初始化数据库连接:
-engine = create_engine('mysql+mysqlconnector://root:mysql@localhost:3306/mystockdata')
+engine = create_engine(
+    f'mysql+mysqlconnector://{params.DATABASE_USER}:{params.DATABASE_PASSWORD}@localhost:3306/{params.DATABASE_NAME}')
 DBSession = sessionmaker(bind=engine)
 # 创建Session:
 session: object = DBSession()
@@ -61,16 +62,20 @@ def add_daily_info(id, code, trade_date, open, close, high, low, pre_close, pcha
     """
     daily_info = DailyInfo(id=id, code=code, trade_date=trade_date, open=open, close=close, high=high, low=low,
                            pre_close=pre_close, pchange=pchange, pct_change=pct_change, vol=vol, amount=amount)
-    session.add(daily_info)
-    session.commit()
+    try:
+        session.add(daily_info)
+        session.rollback()
+        session.commit()
+    except Exception as err:
+        print("插入失败：", err)
 
 
-def hs30_daily_queryy():
+def hs300_daily_queryy(date):
     """
     查询沪深30股票分时数据
     :return:
     """
-    return session.query(DailyInfo).all()
+    return pandas.read_sql(session.query(DailyInfo).filter(DailyInfo.trade_date == date).statement, session.bind)
 
 
 class IndexStocks(Base):
@@ -94,11 +99,15 @@ def add_index_stocks(code, date, name, weight):
     :return:
     """
     index_stocks = IndexStocks(code=code, date=date, name=name, weight=weight)
-    session.add(index_stocks)
-    session.commit()
+    try:
+        session.add(index_stocks)
+        session.commit()
+    except Exception as err:
+        session.rollback()
+        print("插入失败：", err)
 
 
-def hs30_queryy():
+def hs300_queryy():
     """
     查询沪深30股票代码信息
     :return:
@@ -151,7 +160,10 @@ def add_tick_date(code, date, time, price, pchange, volume, amount, type, id):
           + '\'' + str(amount) + '\'' + ',' \
           + '\'' + str(type) + '\'' \
           + ')'
-    myDb.data_insert(db, cursor, sql)
+    try:
+        myDb.data_insert(db, cursor, sql)
+    except Exception as err:
+        print("插入失败：", err)
 
 
 def tick_data_query(code, date=None):
@@ -174,18 +186,18 @@ class MoneyFlow(Base):
     id = Column(String(14), primary_key=True)
     code = Column(String(6))
     date = Column(String(8))
-    sell_sm_vol = Column(INTEGER(12))
-    sell_sm_amt = Column(INTEGER(12))
-    buy_sm_vol = Column(INTEGER(12))
-    buy_sm_amt = Column(INTEGER(12))
-    total_sell_vol = Column(INTEGER(12))
-    total_sell_amt =Column(INTEGER(12))
-    total_buy_vol = Column(INTEGER(12))
-    total_buy_amt = Column(INTEGER(12))
-    total_vol = Column(INTEGER(12))
-    total_amt = Column(INTEGER(12))
-    total_sm_vol = Column(INTEGER(12))
-    total_sm_amt = Column(INTEGER(12))
+    sell_sm_vol = Column(INTEGER(16))
+    sell_sm_amt = Column(INTEGER(16))
+    buy_sm_vol = Column(INTEGER(16))
+    buy_sm_amt = Column(INTEGER(16))
+    total_sell_vol = Column(INTEGER(16))
+    total_sell_amt =Column(INTEGER(16))
+    total_buy_vol = Column(INTEGER(16))
+    total_buy_amt = Column(INTEGER(16))
+    total_vol = Column(INTEGER(16))
+    total_amt = Column(INTEGER(16))
+    total_sm_vol = Column(INTEGER(16))
+    total_sm_amt = Column(INTEGER(16))
 
 
 def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_amt,
@@ -216,5 +228,98 @@ def add_money_flow(id, code, date, sell_sm_vol, sell_sm_amt, buy_sm_vol, buy_sm_
                           total_sell_amt=int(total_sell_amt), total_buy_vol=int(total_buy_vol), total_buy_amt=int(total_buy_amt),
                           total_amt=int(total_amt), total_vol=int(total_vol), total_sm_amt=int(total_sm_amt),
                           total_sm_vol=int(total_sm_vol))
-    session.add(moneyflow)
-    session.commit()
+    try:
+        session.add(moneyflow)
+        session.commit()
+        print(code, '-', date, ":插入成功")
+    except Exception as err:
+        session.rollback()
+        print("插入失败：", err)
+
+
+def get_moneyflow_info(date=None):
+    """
+    查询所有个股单日资金流向信息
+    :param date:
+    :return:
+    """
+    if date is not None:
+        return pandas.read_sql(session.query(MoneyFlow).filter(MoneyFlow.date == date).statement, session.bind)
+    else:
+        return pandas.read_sql(session.query(MoneyFlow).statement, session.bind)
+
+
+class MoneyFlowStatistic(Base):
+    """
+    个股资金流向统计信息（沪深300）
+    """
+    __tablename__ = 'moneyflowstatistic'
+    trade_date = Column(String(8), primary_key=True)
+    small_vol = Column(INTEGER(16))
+    small_amt = Column(INTEGER(16))
+    total_vol = Column(INTEGER(16))
+    total_amt = Column(INTEGER(16))
+    small_total_rate = Column(FLOAT(precision=4, scale=4))
+
+
+def add_moneyflowstatistic(trade_date, small_vol, small_amt, total_vol, total_amt, small_total_rate):
+    """
+    插入沪深300统计信息
+    :param trade_date:yyyyMMdd
+    :param small_vol:
+    :param small_amt:
+    :param total_vol:
+    :param total_amt:
+    :param samll_total_rate:0.4f
+    :return:
+    """
+    moneyflowstatistic = MoneyFlowStatistic(trade_date=int(trade_date), small_amt=int(small_amt), small_vol=int(small_vol),
+                                            total_vol=int(total_vol), total_amt=int(total_amt),
+                                            small_total_rate=small_total_rate)
+    try:
+        session.add(moneyflowstatistic)
+        session.commit()
+        print(trade_date, ":插入成功")
+    except Exception as err:
+        session.rollback()
+        raise err
+
+
+def getMoneyFlowStatistic():
+    """查询现金流统计信息"""
+    return pandas.read_sql(session.query(MoneyFlowStatistic).statement, session.bind)
+
+
+class MyIndex(Base):
+    """
+    我的指数
+    :param 交易日期
+    :param 指数点位
+    """
+    __tablename__ = 'myindex'
+    date = Column(String(8), primary_key=True)
+    index = Column(FLOAT(precision=10, scale=2))
+
+
+def my_index_add(date, index):
+    """
+    插入指数点位
+    :param date:
+    :param index:
+    :return:
+    """
+    myindex = MyIndex(date=date, index=index)
+    try:
+        session.add(myindex)
+        session.commit()
+    except Exception as err:
+        session.rollback()
+        raise err
+
+
+def my_index_querry():
+    """
+    查询指数点位
+    :return:
+    """
+    return pandas.read_sql(session.query(MoneyFlow).statement, session.bind)

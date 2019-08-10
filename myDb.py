@@ -4,14 +4,15 @@
 
 import pymysql as mysql
 import traceback
+import params
 
 
 def db_connect():
     """
     数据库连接
     """
-    db = mysql.connect("localhost", "root", "mysql", "mystockdata")
-    print("mystockdata:数据连接成功")
+    db = mysql.connect("localhost", params.DATABASE_USER, params.DATABASE_PASSWORD, params.DATABASE_NAME)
+    print("数据连接成功")
     return db
 
 
